@@ -315,7 +315,9 @@ static bool parse_float_fallback(const uint8_t *ptr, double *outDouble) {
   //
   // Therefore, fall back to this solution (the extra parens are there
   // to handle that max may be a macro on windows).
-  return !(*outDouble > (std::numeric_limits<double>::max)() || *outDouble < std::numeric_limits<double>::lowest());
+
+  // SIMDJSON_PHP patch imitating PHP json_decode() to accept infinite values
+  return true; // !(*outDouble > (std::numeric_limits<double>::max)() || *outDouble < std::numeric_limits<double>::lowest());
 }
 static bool parse_float_fallback(const uint8_t *ptr, const uint8_t *end_ptr, double *outDouble) {
   *outDouble = simdjson::internal::from_chars(reinterpret_cast<const char *>(ptr), reinterpret_cast<const char *>(end_ptr));
@@ -329,7 +331,9 @@ static bool parse_float_fallback(const uint8_t *ptr, const uint8_t *end_ptr, dou
   //
   // Therefore, fall back to this solution (the extra parens are there
   // to handle that max may be a macro on windows).
-  return !(*outDouble > (std::numeric_limits<double>::max)() || *outDouble < std::numeric_limits<double>::lowest());
+
+  // SIMDJSON_PHP patch imitating PHP json_decode() to accept infinite values
+  return true; // !(*outDouble > (std::numeric_limits<double>::max)() || *outDouble < std::numeric_limits<double>::lowest());
 }
 
 // check quickly whether the next 8 chars are made of digits
@@ -501,7 +505,8 @@ simdjson_inline error_code write_float(const uint8_t *const src, bool negative, 
       return SUCCESS;
     } else { // (exponent > largest_power) and (i != 0)
       // We have, for sure, an infinite value and simdjson refuses to parse infinite values.
-      return INVALID_NUMBER(src);
+      WRITE_DOUBLE(negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity(), src, writer); // SIMDJSON_PHP patch imitating PHP json_decode() // return INVALID_NUMBER(src);
+      return SUCCESS;
     }
   }
   double d;
@@ -581,6 +586,7 @@ simdjson_inline error_code parse_number(const uint8_t *const src, W &writer) {
     SIMDJSON_TRY( parse_exponent(src, p, exponent) );
   }
   if (is_float) {
+parse_float: // SIMDJSON_PHP patch imitating PHP json_decode()
     const bool dirty_end = jsoncharutils::is_not_structural_or_whitespace(*p);
     SIMDJSON_TRY( write_float(src, negative, i, start_digits, digit_count, exponent, writer) );
     if (dirty_end) { return INVALID_NUMBER(src); }
@@ -591,11 +597,11 @@ simdjson_inline error_code parse_number(const uint8_t *const src, W &writer) {
   // The longest positive 64-bit number is 20 digits.
   // We do it this way so we don't trigger this branch unless we must.
   size_t longest_digit_count = negative ? 19 : 20;
-  if (digit_count > longest_digit_count) { return INVALID_NUMBER(src); }
+  if (digit_count > longest_digit_count) { goto parse_float; } // SIMDJSON_PHP patch imitating PHP json_decode() { return INVALID_NUMBER(src); }
   if (digit_count == longest_digit_count) {
     if (negative) {
       // Anything negative above INT64_MAX+1 is invalid
-      if (i > uint64_t(INT64_MAX)+1) { return INVALID_NUMBER(src);  }
+      if (i > uint64_t(INT64_MAX)+1) { goto parse_float; } // SIMDJSON_PHP patch imitating PHP json_decode() return INVALID_NUMBER(src);  }
       WRITE_INTEGER(~i+1, src, writer);
       if (jsoncharutils::is_not_structural_or_whitespace(*p)) { return INVALID_NUMBER(src); }
       return SUCCESS;
@@ -611,8 +617,9 @@ simdjson_inline error_code parse_number(const uint8_t *const src, W &writer) {
     // - Therefore, if the number is positive and lower than that, it's overflow.
     // - The value we are looking at is less than or equal to INT64_MAX.
     //
-    }  else if (src[0] != uint8_t('1') || i <= uint64_t(INT64_MAX)) { return INVALID_NUMBER(src); }
+    }  else if (src[0] != uint8_t('1') || i <= uint64_t(INT64_MAX)) { goto parse_float; } // SIMDJSON_PHP patch imitating PHP json_decode() return INVALID_NUMBER(src);  }
   }
+
 
   // Write unsigned if it doesn't fit in a signed integer.
   if (i > uint64_t(INT64_MAX)) {
