@@ -45,7 +45,9 @@ bool is_skip_listed(const char *name) {
 bool is_white_listed(const char *name) {
   std::vector<const char*> white_list = {"fail02.json", "fail08.json", "fail10.json", "fail32.json", "fail33.json",
                                          "fail52.json", "fail53.json", "fail54.json", "fail70.json", "fail74.json",
-                                         "fail78.json", "fail79.json", "fail80.json"};
+                                         "fail78.json", "fail79.json", "fail80.json",
+                                         "fail73.json", "fail60.json", "fail41_toolarge.json", // SIMDJSON_PHP patch imitating PHP json_decode()
+                                         };
   for(const char* x : white_list) {
     if(starts_with(x, name)) {
       std::cout << " Though the file " << x << " is not valid JSON, we expect parse_many to succeed." << std::endl;

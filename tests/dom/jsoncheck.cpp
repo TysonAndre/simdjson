@@ -32,6 +32,19 @@ bool contains(const char *pre, const char *str) {
   return (strstr(str, pre) != nullptr);
 }
 
+// SIMDJSON_PHP patch imitating PHP json_decode()
+bool is_allowed_to_pass(const char *name) {
+  std::vector<const char*> allowed_failures = {"fail73.json", "fail60.json", "fail41_toolarge.json"};
+  for(const char* x : allowed_failures) {
+    if(starts_with(x, name)) {
+      std::cout << " Though the file " << x << " is not valid JSON, we expect parse to succeed for use in PHP simdjson_decode." << std::endl;
+      return true;
+    }
+  }
+  return false;
+}
+// END SIMDJSON_PHP
+
 bool validate(const char *dirname) {
   bool everything_fine = true;
   const char *extension = ".json";
@@ -77,12 +90,14 @@ bool validate(const char *dirname) {
       if (contains("EXCLUDE", name)) {
         // skipping
         how_many--;
-      } else if (starts_with("pass", name) && errorcode != simdjson::error_code::SUCCESS) {
-        is_file_as_expected[i] = false;
-        printf("warning: file %s should pass but it fails. Error is: %s\n",
-               name, simdjson::error_message(errorcode));
-        printf("size of file in bytes: %zu \n", p.size());
-        everything_fine = false;
+      } else if (starts_with("pass", name) || is_allowed_to_pass(name)) {
+        if (errorcode != simdjson::error_code::SUCCESS) {
+          is_file_as_expected[i] = false;
+          printf("warning: file %s should pass but it fails. Error is: %s\n",
+                 name, simdjson::error_message(errorcode));
+          printf("size of file in bytes: %zu \n", p.size());
+          everything_fine = false;
+        }
       } else if (starts_with("fail", name) && errorcode == simdjson::error_code::SUCCESS) {
         is_file_as_expected[i] = false;
         printf("warning: file %s should fail but it passes.\n", name);
