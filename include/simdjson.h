@@ -1,5 +1,6 @@
 #ifndef SIMDJSON_H
 #define SIMDJSON_H
+/* Generated from https://github.com/TysonAndre/simdjson/tree/simdjson_php */
 
 /**
  * @mainpage

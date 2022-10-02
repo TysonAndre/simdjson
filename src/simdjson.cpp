@@ -1,3 +1,4 @@
+/* Generated from https://github.com/TysonAndre/simdjson/tree/simdjson_php */
 #include "simdjson.h"
 
 SIMDJSON_PUSH_DISABLE_WARNINGS
