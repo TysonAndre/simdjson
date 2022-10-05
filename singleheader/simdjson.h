@@ -1,4 +1,4 @@
-/* auto-generated on 2022-10-01 20:09:27 -0400. Do not edit! */
+/* auto-generated on 2022-10-01 20:09:47 -0400. Do not edit! */
 /* begin file include/simdjson.h */
 #ifndef SIMDJSON_H
 #define SIMDJSON_H
@@ -44,7 +44,7 @@
 #define SIMDJSON_SIMDJSON_VERSION_H
 
 /** The version of simdjson being used (major.minor.revision) */
-#define SIMDJSON_VERSION 2.2.2
+#define SIMDJSON_VERSION 2.2.3
 
 namespace simdjson {
 enum {
@@ -59,7 +59,7 @@ enum {
   /**
    * The revision (major.minor.REVISION) of simdjson being used.
    */
-  SIMDJSON_VERSION_REVISION = 2
+  SIMDJSON_VERSION_REVISION = 3
 };
 } // namespace simdjson
 
@@ -10803,7 +10803,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   // In the slow path, we need to adjust i so that it is > 1<<63 which is always
   // possible, except if i == 0, so we handle i == 0 separately.
   if(i == 0) {
-    d = 0.0;
+    d = negative ? -0.0 : 0.0;
     return true;
   }
 
@@ -10918,7 +10918,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   if (simdjson_unlikely(real_exponent <= 0)) { // we have a subnormal?
     // Here have that real_exponent <= 0 so -real_exponent >= 0
     if(-real_exponent + 1 >= 64) { // if we have more than 64 bits below the minimum exponent, you have a zero for sure.
-      d = 0.0;
+      d = negative ? -0.0 : 0.0;
       return true;
     }
     // next line is safe because -real_exponent + 1 < 0
@@ -11192,7 +11192,8 @@ simdjson_inline error_code write_float(const uint8_t *const src, bool negative, 
     static_assert(simdjson::internal::smallest_power <= -342, "smallest_power is not small enough");
     //
     if((exponent < simdjson::internal::smallest_power) || (i == 0)) {
-      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer); // SIMDJSON_PHP patch imitating php's json_decode('-1e-999')
+      // E.g. Parse "-0.0e-999" into the same value as "-0.0". See https://en.wikipedia.org/wiki/Signed_zero
+      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer);
       return SUCCESS;
     } else { // (exponent > largest_power) and (i != 0)
       // We have, for sure, an infinite value and simdjson refuses to parse infinite values.
@@ -12509,7 +12510,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   // In the slow path, we need to adjust i so that it is > 1<<63 which is always
   // possible, except if i == 0, so we handle i == 0 separately.
   if(i == 0) {
-    d = 0.0;
+    d = negative ? -0.0 : 0.0;
     return true;
   }
 
@@ -12624,7 +12625,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   if (simdjson_unlikely(real_exponent <= 0)) { // we have a subnormal?
     // Here have that real_exponent <= 0 so -real_exponent >= 0
     if(-real_exponent + 1 >= 64) { // if we have more than 64 bits below the minimum exponent, you have a zero for sure.
-      d = 0.0;
+      d = negative ? -0.0 : 0.0;
       return true;
     }
     // next line is safe because -real_exponent + 1 < 0
@@ -12898,7 +12899,8 @@ simdjson_inline error_code write_float(const uint8_t *const src, bool negative, 
     static_assert(simdjson::internal::smallest_power <= -342, "smallest_power is not small enough");
     //
     if((exponent < simdjson::internal::smallest_power) || (i == 0)) {
-      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer); // SIMDJSON_PHP patch imitating php's json_decode('-1e-999')
+      // E.g. Parse "-0.0e-999" into the same value as "-0.0". See https://en.wikipedia.org/wiki/Signed_zero
+      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer);
       return SUCCESS;
     } else { // (exponent > largest_power) and (i != 0)
       // We have, for sure, an infinite value and simdjson refuses to parse infinite values.
@@ -14712,7 +14714,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   // In the slow path, we need to adjust i so that it is > 1<<63 which is always
   // possible, except if i == 0, so we handle i == 0 separately.
   if(i == 0) {
-    d = 0.0;
+    d = negative ? -0.0 : 0.0;
     return true;
   }
 
@@ -14827,7 +14829,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   if (simdjson_unlikely(real_exponent <= 0)) { // we have a subnormal?
     // Here have that real_exponent <= 0 so -real_exponent >= 0
     if(-real_exponent + 1 >= 64) { // if we have more than 64 bits below the minimum exponent, you have a zero for sure.
-      d = 0.0;
+      d = negative ? -0.0 : 0.0;
       return true;
     }
     // next line is safe because -real_exponent + 1 < 0
@@ -15101,7 +15103,8 @@ simdjson_inline error_code write_float(const uint8_t *const src, bool negative, 
     static_assert(simdjson::internal::smallest_power <= -342, "smallest_power is not small enough");
     //
     if((exponent < simdjson::internal::smallest_power) || (i == 0)) {
-      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer); // SIMDJSON_PHP patch imitating php's json_decode('-1e-999')
+      // E.g. Parse "-0.0e-999" into the same value as "-0.0". See https://en.wikipedia.org/wiki/Signed_zero
+      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer);
       return SUCCESS;
     } else { // (exponent > largest_power) and (i != 0)
       // We have, for sure, an infinite value and simdjson refuses to parse infinite values.
@@ -16902,7 +16905,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   // In the slow path, we need to adjust i so that it is > 1<<63 which is always
   // possible, except if i == 0, so we handle i == 0 separately.
   if(i == 0) {
-    d = 0.0;
+    d = negative ? -0.0 : 0.0;
     return true;
   }
 
@@ -17017,7 +17020,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   if (simdjson_unlikely(real_exponent <= 0)) { // we have a subnormal?
     // Here have that real_exponent <= 0 so -real_exponent >= 0
     if(-real_exponent + 1 >= 64) { // if we have more than 64 bits below the minimum exponent, you have a zero for sure.
-      d = 0.0;
+      d = negative ? -0.0 : 0.0;
       return true;
     }
     // next line is safe because -real_exponent + 1 < 0
@@ -17291,7 +17294,8 @@ simdjson_inline error_code write_float(const uint8_t *const src, bool negative, 
     static_assert(simdjson::internal::smallest_power <= -342, "smallest_power is not small enough");
     //
     if((exponent < simdjson::internal::smallest_power) || (i == 0)) {
-      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer); // SIMDJSON_PHP patch imitating php's json_decode('-1e-999')
+      // E.g. Parse "-0.0e-999" into the same value as "-0.0". See https://en.wikipedia.org/wiki/Signed_zero
+      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer);
       return SUCCESS;
     } else { // (exponent > largest_power) and (i != 0)
       // We have, for sure, an infinite value and simdjson refuses to parse infinite values.
@@ -19202,7 +19206,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   // In the slow path, we need to adjust i so that it is > 1<<63 which is always
   // possible, except if i == 0, so we handle i == 0 separately.
   if(i == 0) {
-    d = 0.0;
+    d = negative ? -0.0 : 0.0;
     return true;
   }
 
@@ -19317,7 +19321,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   if (simdjson_unlikely(real_exponent <= 0)) { // we have a subnormal?
     // Here have that real_exponent <= 0 so -real_exponent >= 0
     if(-real_exponent + 1 >= 64) { // if we have more than 64 bits below the minimum exponent, you have a zero for sure.
-      d = 0.0;
+      d = negative ? -0.0 : 0.0;
       return true;
     }
     // next line is safe because -real_exponent + 1 < 0
@@ -19591,7 +19595,8 @@ simdjson_inline error_code write_float(const uint8_t *const src, bool negative, 
     static_assert(simdjson::internal::smallest_power <= -342, "smallest_power is not small enough");
     //
     if((exponent < simdjson::internal::smallest_power) || (i == 0)) {
-      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer); // SIMDJSON_PHP patch imitating php's json_decode('-1e-999')
+      // E.g. Parse "-0.0e-999" into the same value as "-0.0". See https://en.wikipedia.org/wiki/Signed_zero
+      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer);
       return SUCCESS;
     } else { // (exponent > largest_power) and (i != 0)
       // We have, for sure, an infinite value and simdjson refuses to parse infinite values.
@@ -21350,7 +21355,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   // In the slow path, we need to adjust i so that it is > 1<<63 which is always
   // possible, except if i == 0, so we handle i == 0 separately.
   if(i == 0) {
-    d = 0.0;
+    d = negative ? -0.0 : 0.0;
     return true;
   }
 
@@ -21465,7 +21470,7 @@ simdjson_inline bool compute_float_64(int64_t power, uint64_t i, bool negative, 
   if (simdjson_unlikely(real_exponent <= 0)) { // we have a subnormal?
     // Here have that real_exponent <= 0 so -real_exponent >= 0
     if(-real_exponent + 1 >= 64) { // if we have more than 64 bits below the minimum exponent, you have a zero for sure.
-      d = 0.0;
+      d = negative ? -0.0 : 0.0;
       return true;
     }
     // next line is safe because -real_exponent + 1 < 0
@@ -21739,7 +21744,8 @@ simdjson_inline error_code write_float(const uint8_t *const src, bool negative, 
     static_assert(simdjson::internal::smallest_power <= -342, "smallest_power is not small enough");
     //
     if((exponent < simdjson::internal::smallest_power) || (i == 0)) {
-      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer); // SIMDJSON_PHP patch imitating php's json_decode('-1e-999')
+      // E.g. Parse "-0.0e-999" into the same value as "-0.0". See https://en.wikipedia.org/wiki/Signed_zero
+      WRITE_DOUBLE(negative ? -0.0 : 0.0, src, writer);
       return SUCCESS;
     } else { // (exponent > largest_power) and (i != 0)
       // We have, for sure, an infinite value and simdjson refuses to parse infinite values.
@@ -26352,12 +26358,21 @@ public:
   /** The maximum capacity of this parser (the largest document it is allowed to process). */
   simdjson_inline size_t max_capacity() const noexcept;
   simdjson_inline void set_max_capacity(size_t max_capacity) noexcept;
-  /** The maximum depth of this parser (the most deeply nested objects and arrays it can process). */
+  /**
+   * The maximum depth of this parser (the most deeply nested objects and arrays it can process).
+   * This parameter is only relevant when the macro SIMDJSON_DEVELOPMENT_CHECKS is set to true.
+   * The document's instance current_depth() method should be used to monitor the parsing
+   * depth and limit it if desired.
+   */
   simdjson_inline size_t max_depth() const noexcept;
 
   /**
    * Ensure this parser has enough memory to process JSON documents up to `capacity` bytes in length
    * and `max_depth` depth.
+   *
+   * The max_depth parameter is only relevant when the macro SIMDJSON_DEVELOPMENT_CHECKS is set to true.
+   * The document's instance current_depth() method should be used to monitor the parsing
+   * depth and limit it if desired.
    *
    * @param capacity The new capacity.
    * @param max_depth The new max_depth. Defaults to DEFAULT_MAX_DEPTH.
@@ -27812,6 +27827,7 @@ simdjson_inline void json_iterator::reenter_child(token_position position, depth
   SIMDJSON_ASSUME(_depth == child_depth - 1);
 #if SIMDJSON_DEVELOPMENT_CHECKS
 #ifndef SIMDJSON_CLANG_VISUAL_STUDIO
+  SIMDJSON_ASSUME(size_t(child_depth) < parser->max_depth());
   SIMDJSON_ASSUME(position >= parser->start_positions[child_depth]);
 #endif
 #endif
@@ -27822,11 +27838,13 @@ simdjson_inline void json_iterator::reenter_child(token_position position, depth
 #if SIMDJSON_DEVELOPMENT_CHECKS
 
 simdjson_inline token_position json_iterator::start_position(depth_t depth) const noexcept {
-  return parser->start_positions[depth];
+  SIMDJSON_ASSUME(size_t(depth) < parser->max_depth());
+  return size_t(depth) < parser->max_depth() ? parser->start_positions[depth] : 0;
 }
 
 simdjson_inline void json_iterator::set_start_position(depth_t depth, token_position position) noexcept {
-  parser->start_positions[depth] = position;
+  SIMDJSON_ASSUME(size_t(depth) < parser->max_depth());
+  if(size_t(depth) < parser->max_depth()) { parser->start_positions[depth] = position; }
 }
 
 #endif

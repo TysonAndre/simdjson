@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsimdjson-singleheader.a  CMakeFiles/simdjson-singleheader.dir/simdjson.cpp.o
+/usr/bin/ranlib libsimdjson-singleheader.a
